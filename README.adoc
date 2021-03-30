@@ -3,11 +3,9 @@
 NOTE: TP de deux slots de 1h20
 
 ## Nom du(des) étudiant(e)(s) de ce monôme/binôme 
-WARNING: NE PAS OUBLIER DE MENTIONNER LES DEUX NOMS SI VOUS ETES EN BINOME!
 
-#XXX# (et #YYY#)
+Samuel Rigaud & Gaetan Pellerin
 
-Commentaires éventuels des étudiants : #XXXXXX#
 
 ## Pré-requis 
 
@@ -20,11 +18,6 @@ Commentaires éventuels des étudiants : #XXXXXX#
 
 *Répondre aux questions de la feuille de TP juste sous la question* (en modifiant, commitant puis poussant le fichier `README.adoc`).
 
-Nous fournissons différents projets Eclipse servant de base de travail aux exercices suivant. Cela permet un point de synchronisation de tous les étudiants à différents moments du TP. 
-
-TIP: Fermer chaque projet Eclipse (sans supprimer les sources) avant de passer à l'exercice suivant pour éviter de confondre les projets ex1 et ex2.
-
-
 ### Exercice 1 - Etudier une API REST sans couches
 _Temps estimé : 40 mins_
 
@@ -32,16 +25,23 @@ _Temps estimé : 40 mins_
 
 Faire `File` -> `Import` -> `Projects from Git (with smart import)` -> `Clone URI` -> URI: `https://github.com/<x>/tp1-miage-2021.git` (conserver les autres options inchangées) -> 'Import projects from File System or Archives' : ne laisser cocher que `tp1-miage-2021/tolist-debut-ex1` et `tp1-miage-2021/tolist-debut-ex2` ('import as Maven') -> Bouton 'Finish'.
 
-TIP: [Rappel Git] Trois dépôts sont ici utilisés: le dépot Github de l'enseignant (`bflorat/tp1-miage-2021`), le dépot Github du binôme (`<x>/tp1-miage-2021`), le dépot local sur le portable de l'un ou des deux étudiants du binôme.
-
 
 * Observer le code du projet `todolist-debut-ex1`
 
 *Le code est-il structuré en couches ? Quel problèmes ce code peut-il poser ?*
 
+Le code est constitué d'un monolythe Java Spring standard. On retrouve une entité, un controller et un repository avec un fort couplage entre ces éléments. Il n'y a donc pas la notion de couche au point de vu architecturel même si chaque partie du monolythe a ses propres responsabilités (interaction avec la BD, gestion des requetes, ...)
+
+
 *Où se trouve le code métier (voir la règle de gestion RG 1) ?*
 
+La règle métier se trouve dans le controleur : _TodoListControler.java_
+
+
 *Cette règle est-elle facilement testable par un test unitaire ?*
+
+La règle est difficilement testable : la méthode est privée puis il faudrait potentiellement mock Instant.now si l'on veut pouvoir tester tous les edges cases (cas où l'instant est supérieur, inférieur ou identique au moment présent).
+
 
 * Lancer une base PostgreSQL en Docker dans un terminal (on lance ici la base en mode interactif pour visualiser son activité. Pour la lancer en tâche de fond, remplacer les options `it` par `d` comme 'daemon'):
 ```bash
@@ -49,9 +49,21 @@ docker run -it -e POSTGRES_PASSWORD=password -p 5432:5432 postgres
 ```
 *Expliquer cette ligne de commande (y compris les options utilisées)*
 
+Avec cette commande on va lancer un conteneur Docker avec l'image appelée "postgres". Pour ce qui est des options : 
+
+-it : terminal en mode interactif
+
+-e : saisir une variable d'environnement
+
+-p : mapping de port (entre l'intérieur et l'extérieur du conteneur)
+
+
 * Compléter le code manquant dans la méthode `TodoListController.createTodoItem()`
 
 *Pourquoi `todoItemRepository` est-il `null` ? Quelle est la meilleure façon de l'injecter ?*
+
+La variable n'est pas initialiser, il manque une injection. On va utiliser le décorateur @Inject pour palierà cela.
+
 
 * Modifier le code en conséquence.
 
@@ -94,6 +106,9 @@ Source : http://leanpub.com/get-your-hands-dirty-on-clean-architecture[Tom Hombe
 
 *Rappeler en quelques lignes les grands principes de l'architecture hexagonale.*
 
+L'architecture hexagonale vise à séparer l'aspect métier du technique. Pour ce faire des "ports" sont utilisés afin de faire l'interface entre ces deux notions. Cela permet de garantir le principe de faible couplage et de forte cohésion.
+
+
 Compléter ce code avec une fonctionnalité de création de `TodoItem`  persisté en base et appelé depuis un endpoint REST `POST /todos` qui :
 
 * prend un `TodoItem` au format JSON dans le body (voir exemple de contenu plus haut);
@@ -110,9 +125,17 @@ _Temps estimé : 20 mins_
 
 *Quels types de tests devra-t-on écrire pour les adapteurs ?* 
 
+Les adapteurs doivents faire le lien avec la partie technique comme les serveurs de base de données, base Redis, gestion des requètes web ...
+Le but est donc de créer des tests d'intégrations.
+
+
 *Que teste-on dans ce cas ?*
 
+On cherche à savoir s'ils arrivent à accèder aux ressources et à faire le lien.
+
 *S'il vous reste du temps, écrire quelques uns de ces types de test.*
+
+Pas de TI, seuleument des TU réalisés dans notre projet.
 
 [TIP]
 =====
